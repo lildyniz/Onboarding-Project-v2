@@ -19,4 +19,4 @@ class BusinessAdmin(admin.ModelAdmin):
 
 @admin.register(Direction)
 class DirectionAdmin(admin.ModelAdmin):
-    list_display = ['name', 'business']
+    list_display = ['direction', 'business']

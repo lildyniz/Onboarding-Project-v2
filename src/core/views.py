@@ -3,7 +3,7 @@ from django.http import HttpResponse
 from formtools.wizard.views import SessionWizardView
 
 from .forms import UserDetailForm, BusinessDetailForm, DirectionForm
-from .models import Direction, Business  # new
+from .models import Direction, Business
 
 
 
@@ -20,7 +20,7 @@ class BusinessWizzardView(SessionWizardView):
                 # Получаем объект Business по его типу
                 business = get_object_or_404(Business, business_type=business_type)
                 # Фильтруем направления по выбранному типу бизнеса
-                form.fields['name'].queryset = Direction.objects.filter(business=business)
+                form.fields['direction'].queryset = Direction.objects.filter(business=business)
         return form
 
     def done(self, form_list, **kwargs):
