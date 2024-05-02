@@ -1,4 +1,5 @@
 {% extends "base.html" %}
+{% load crispy_forms_tags %}
 {% load i18n %}
 
 {% block head %}
@@ -14,10 +15,12 @@
             {% if wizard.form.forms %}
                 {{ wizard.form.management_form }}
                 {% for form in wizard.form.forms %}
-                    {{ form.as_table }}
+                    {% comment %} {{ form.as_table }} {% endcomment %}
+                    {{ form|crispy }}
                 {% endfor %}
             {% else %}
-                {{ wizard.form }}
+                {% comment %} {{ wizard.form }} {% endcomment %}
+                {{ wizard.form|crispy }}
             {% endif %}
         </table>
         {% if wizard.steps.prev %}
