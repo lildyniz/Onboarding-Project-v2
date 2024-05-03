@@ -1,5 +1,5 @@
 from django.contrib import admin
-from .models import User, Business, Direction
+from .models import User, Business, Direction, Region, City
 
 
 @admin.register(User)
@@ -10,6 +10,8 @@ class UserAdmin(admin.ModelAdmin):
 class DirectionInline(admin.StackedInline):
     model = Direction
 
+class CityInline(admin.StackedInline):
+    model = City
 
 @admin.register(Business)
 class BusinessAdmin(admin.ModelAdmin):
@@ -20,3 +22,14 @@ class BusinessAdmin(admin.ModelAdmin):
 @admin.register(Direction)
 class DirectionAdmin(admin.ModelAdmin):
     list_display = ['direction', 'business']
+
+
+@admin.register(Region)
+class RegionAdmin(admin.ModelAdmin):
+    list_display = ['region']
+    cities = [CityInline]
+
+
+@admin.register(City)
+class CityAdmin(admin.ModelAdmin):
+    list_display = ['city', 'region']

@@ -169,3 +169,5 @@ db.sqlite3
 media
 fixtures
 locals_vars.py
+migrations
+migrations/*
