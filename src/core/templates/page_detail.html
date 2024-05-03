@@ -1,0 +1,36 @@
+{% extends "base.html" %}
+{% load crispy_forms_tags %}
+{% load i18n %}
+
+{% block head %}
+    {{ page.title }}
+{% endblock %}
+
+{% block content %}
+    <ul>
+        {% for parameter in parameters %}
+        <li>{{ parameter.name }}</li>
+        {% endfor %}
+    </ul>
+
+    
+<form method="post">
+    {% csrf_token %}
+    {% for field in form %}
+        <div>
+            {{ field.label_tag }}
+            <br>
+            {{ field }}
+            {% if field.errors %}
+                <div class="errors">
+                    {% for error in field.errors %}
+                        {{ error }}
+                    {% endfor %}
+                </div>
+            {% endif %}
+        </div>
+        <br>
+    {% endfor %}
+    <button type="submit">Отправить</button>
+</form>
+{% endblock %}

@@ -15,14 +15,13 @@
             {% if wizard.form.forms %}
                 {{ wizard.form.management_form }}
                 {% for form in wizard.form.forms %}
-                    {% comment %} {{ form.as_table }} {% endcomment %}
-                    {{ form|crispy }}
+                    {{ form }}
                 {% endfor %}
             {% else %}
-                {% comment %} {{ wizard.form }} {% endcomment %}
-                {{ wizard.form|crispy }}
+                {{ wizard.form }}
             {% endif %}
         </table>
+        <br>
         {% if wizard.steps.prev %}
             <button name="wizard_goto_step" type="submit" value="{{ wizard.steps.first }}">{% translate "first step" %}</button>
             <button name="wizard_goto_step" type="submit" value="{{ wizard.steps.prev }}">{% translate "prev step" %}</button>

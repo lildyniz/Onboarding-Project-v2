@@ -1,0 +1,13 @@
+{% extends "base.html" %}
+{% load crispy_forms_tags %}
+{% load i18n %}
+
+{% block head %}
+    Done
+{% endblock %}
+
+{% block content %}
+    {% for data in form_data %}
+        {{ data }}
+    {% endfor %}
+{% endblock %}
