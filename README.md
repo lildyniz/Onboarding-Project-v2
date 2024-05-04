@@ -11,15 +11,10 @@ pip install -r requirements.txt
 ```
 ___
 
-#### Перейдите в src, проведите мигарции и создайте админа
+#### Перейдите в src и запустите сервер
 
 ```
 cd src
-python manage.py migrate
-```
-___
-
-#### Запустите сервер
-```
 python manage.py runserver
 ```
+___
