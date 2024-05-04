@@ -1,0 +1,4 @@
+.form-label {
+    display: block; /* Делаем метки блочными элементами */
+    margin-bottom: 5px; /* Задаем отступ снизу */
+}

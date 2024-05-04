@@ -2,15 +2,14 @@ from django.shortcuts import render, get_object_or_404
 from django.http import HttpResponse
 from formtools.wizard.views import SessionWizardView
 
-from .forms import UserDetailForm, BusinessDetailForm, DirectionForm, PlatformForm, FirstPageForm, SecondPageForm
-from .models import Direction, Business, Region, City, Page, Question
-
+from .forms import UserDetailForm, BusinessDetailForm, DirectionForm, FirstPageForm, SecondPageForm, SurveyForm
+from .models import Direction, Business, Region, City, User, Question, Answer, QuestionForSurvey
 
 TEMPLATES = {
     '0': 'index.html',
     '1': 'index.html',
     '2': 'index.html',
-    '3': 'index.html',
+    '3': 'last_step.html',
     '4': 'last_step.html',
     '5': 'last_step.html',
 }
@@ -19,32 +18,18 @@ FORMS = [
     ('0', UserDetailForm),
     ('1', BusinessDetailForm),
     ('2', DirectionForm),
-    ('3', PlatformForm),
-    ('4', FirstPageForm),
-    ('5', SecondPageForm),
+    ('3', FirstPageForm),
+    ('4', SecondPageForm),
+    ('5', SurveyForm),
 ]
-
-
-# class BusinessWizzardView(SessionWizardView):
-#     form_list = [UserDetailForm, BusinessDetailForm, DirectionForm, QuestionForm]
-#     template_name = 'index.html'
-
-#     def done(self, form_list, **kwargs):
-#         return HttpResponse("Все отправлено!")
-
-
-def previous_platform(wizard):
-    cleaned_data = wizard.get_cleaned_data_for_step('0') or {}
-    return cleaned_data.get('is_business_user')
 
 
 class BusinessWizzardView(SessionWizardView):
     form_list = FORMS
     template_name = 'index.html'
-    condition_dict = {"3": previous_platform}
 
     def get_template_names(self):
-        return [TEMPLATES[self.steps.current]]
+        return [TEMPLATES[self.steps.current]] 
 
     def get_form(self, step=None, data=None, files=None):
         form = super().get_form(step, data, files)
@@ -61,15 +46,37 @@ class BusinessWizzardView(SessionWizardView):
         return form
 
     def done(self, form_list, **kwargs):
+        data = {}
+        for form in form_list:
+            data.update(form.cleaned_data)
+        
+        questions_with_answers = []
+        for key, value in data.items():
+            if key.startswith('question_'):
+                question_id = int(key.split('_')[1])
+                question = Question.objects.get(pk=question_id)
+                answer_id = int(value)
+                answer = Answer.objects.get(pk=answer_id).text
+                questions_with_answers.append(f"{question.text} {answer}")
+            if key.startswith('survey-question_'):
+                question_id = int(key.split('_')[1])
+                question = QuestionForSurvey.objects.get(pk=question_id)
+                answer = "Да" if value == 'True' else 'Нет'
+                questions_with_answers.append(f"{question.text} {answer}")
+
+
+        user= User.objects.create(email=data['email'],
+                                  name = data['name'],
+                                  previous_platform = "Есть" if data['is_business_user'] == 'True' else "Нет",
+                                  business = Business.objects.get(business_type=data['business_type']),
+                                  business_direction = Direction.objects.get(direction=data['direction']),
+                                  region = Region.objects.get(region=data['region']),
+                                  city = City.objects.get(city=data['city']),
+                                  answers_to_questions = "\n".join(questions_with_answers)
+                                )
+        user.save()
+
+
         return render(self.request, 'done.html', {
             'form_data': [form.cleaned_data for form in form_list],
         })
-
-
-# Если страница одна
-def page_detail(request, slug):
-    pass
-#     page = Page.objects.get(slug=slug)
-#     questions = page.questions.all()
-#     form = QuestionForm(questions=questions)
-#     return render(request, 'page_detail.html', {'page': page, 'questions': questions, 'form': form})

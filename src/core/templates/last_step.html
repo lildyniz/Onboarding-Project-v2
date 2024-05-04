@@ -1,27 +1,59 @@
 {% extends "base.html" %}
 {% load crispy_forms_tags %}
 {% load i18n %}
+{% load static %} 
 
 {% block head %}
     {{ wizard.form.media }}
 {% endblock %}
 
 {% block content %}
-<p>Step {{ wizard.steps.step1 }} of {{ wizard.steps.count }}</p>
-<h3>Редактируемые вопросы и ответы</h3>
-    <form method="post">
-        {% csrf_token %}
-        {{ wizard.management_form }}
-        {{ wizard.form.management_form }}
-        {% for field in wizard.form %}
-            {{ field.errors }}
-            {{ field.label_tag }} {{ field }}
+<p>Шаг {{ wizard.steps.step1 }} из {{ wizard.steps.count }}</p>
+{% if wizard.steps.step1 == 7 %}
+    <h4>Редактируемый опрос</h4>
+{% else %}
+    <h4>Редактируемые вопросы и ответы</h4>
+{% endif %}
+<br>
+<form method="post">
+    {% csrf_token %}
+    {{ wizard.management_form }}
+    {{ wizard.form.management_form }}
+    {% for field in wizard.form %}
+        {% if field.field.choices %}
+            <!-- Поле с выбором -->
+            <label for="{{ field.id_for_label }}" class="form-label">{{ field.label }}</label>
+            <select class="form-select {% if field.errors %} is-invalid {% endif %}" id="{{ field.id_for_label }}" name="{{ field.html_name }}" aria-label="{{ field.label }}">
+                <option selected disabled style="color: grey;">Выберите...</option>
+                {% for value, display_name in field.field.choices %}
+                    <option value="{{ value }}">{{ display_name }}</option>
+                {% endfor %}
+            </select>
+            {% if field.errors %}
+                <div class="invalid-feedback">
+                    Это поле обязательно!
+                </div>
+            {% endif %}
             <br>
-        {% endfor %}
-        {% if wizard.steps.prev %}
-        <button name="wizard_goto_step" type="submit" value="{{ wizard.steps.first }}">{% translate "first step" %}</button>
-        <button name="wizard_goto_step" type="submit" value="{{ wizard.steps.prev }}">{% translate "prev step" %}</button>
+        {% else %}
+            {% if field.field.widget.input_type != 'hidden' %}
+                <!-- Текстовое поле -->
+                {% if field.errors %}
+                    <div class="invalid-feedback">
+                        Это поле обязательно!
+                    </div>
+                {% endif %}
+                <label for="{{ field.id_for_label }}" class="form-label">{{ field.label }}</label>
+                {{ field }}
+                <br>
+            {% endif %}
         {% endif %}
-        <input type="submit" value="{% translate "submit" %}"/>
-    </form>
+    {% endfor %}
+        <div class="form-group">
+            {% if wizard.steps.prev %}
+                <button name="wizard_goto_step" type="submit" value="{{ wizard.steps.prev }}" class="btn btn-secondary">Назад</button>
+            {% endif %}
+            <input type="submit" class="btn btn-dark" value="Продолжить"/>
+        </div>
+</form>
 {% endblock %}

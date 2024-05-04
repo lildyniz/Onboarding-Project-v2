@@ -167,7 +167,7 @@ cython_debug/
 
 db.sqlite3
 media
-fixtures
+# fixtures
 locals_vars.py
 migrations
 migrations/*

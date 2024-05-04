@@ -1,5 +1,5 @@
 from django.contrib import admin
-from .models import User, Business, Direction, Region, City, Question, Answer, Page
+from .models import User, Business, Direction, Region, City, Question, Answer, Page, QuestionForSurvey
 
 
 @admin.register(User)
@@ -9,10 +9,6 @@ class UserAdmin(admin.ModelAdmin):
 
 class DirectionInline(admin.StackedInline):
     model = Direction
-
-
-class CityInline(admin.StackedInline):
-    model = City
 
 
 @admin.register(Business)
@@ -26,10 +22,14 @@ class DirectionAdmin(admin.ModelAdmin):
     list_display = ['direction', 'business']
 
 
+class CityInline(admin.StackedInline):
+    model = City
+
+
 @admin.register(Region)
 class RegionAdmin(admin.ModelAdmin):
     list_display = ['region']
-    cities = [CityInline]
+    inlines = [CityInline]
 
 
 @admin.register(City)
@@ -56,7 +56,14 @@ class ParameterValuesAdmin(admin.ModelAdmin):
 class PageAdmin(admin.ModelAdmin):
     list_display = ['title', 'slug', 'display_questions']
 
+    prepopulated_fields = {"slug": ("title",)}
+
     def display_questions(self, obj):
         return ', '.join([str(quest) for quest in obj.questions.all()])
 
     display_questions.short_description = 'Questions'
+
+
+@admin.register(QuestionForSurvey)
+class QuestionForSurveyAdmin(admin.ModelAdmin):
+    list_display = ['text']

@@ -1,14 +1,17 @@
 from django import forms 
-from .models import User, Business, Direction, Region, City, Question, Page
+from .models import User, Business, Direction, Region, City, Page, QuestionForSurvey
 
 
 class UserDetailForm(forms.ModelForm):
 
     BOOL_CHOICES = [(True, 'Да'), (False, 'Нет')]
-    is_business_user = forms.BooleanField(
-        widget=forms.Select(choices=BOOL_CHOICES, attrs={'class': 'form-control', 'style': 'margin-bottom: 15px;'}),
+    is_business_user = forms.ChoiceField(
+        choices=BOOL_CHOICES,
+        widget=forms.Select(attrs={'class': 'form-control', 'style': 'margin-bottom: 10px;'}),
         label="Вы уже пользуетесь другой платформой для бизнеса?",
+        required=True
     )
+
 
     class Meta:
         model = User
@@ -27,13 +30,15 @@ class BusinessDetailForm(forms.Form):
 
     business_type = forms.ModelChoiceField(
         queryset=Business.objects.all(),
+        label="Укажите тип вашего бизнеса",
         empty_label=None,
         widget=forms.Select(attrs={'class': 'form-control'}) 
     )
 
     region = forms.ModelChoiceField(
         queryset=Region.objects.all(),
-        empty_label=None, 
+        label="Укажите регион работы бизнеса",
+        empty_label=None,
         widget=forms.Select(attrs={'class': 'form-control'})  
     )
 
@@ -42,45 +47,17 @@ class DirectionForm(forms.Form):
 
     direction = forms.ModelChoiceField(
         queryset=Direction.objects.all(),
-        empty_label=None, 
+        label="Укажите направление вашего бизнеса",
+        empty_label=None,
         widget=forms.Select(attrs={'class': 'form-control', 'style': 'margin-bottom: 15px;'})  
     )
 
     city = forms.ModelChoiceField(
         queryset=City.objects.all(),
-        empty_label=None, 
+        label="Укажите город работы бизнеса",
+        empty_label=None,
         widget=forms.Select(attrs={'class': 'form-control', 'style': 'margin-bottom: 15px;'})  
     )
-
-
-class PlatformForm(forms.ModelForm):
-
-    class Meta:
-        model = User
-        fields = ('previous_platform',)
-        labels = {
-            'previous_platform': 'Укажите какой платформой для бизнеса вы пользовались',
-        }
-        widgets = {
-            'previous_platform': forms.TextInput(attrs={'class': 'form-control', 'style': 'margin-bottom: 15px;'}),
-        }
-
-
-# Форма, если страница отдельная
-# class QuestionForm(forms.Form):
-    # def __init__(self, *args, **kwargs):
-    #     # questions = kwargs.pop('questions', None)
-    #     questions = Question.objects.all()
-    #     super(QuestionForm, self).__init__(*args, **kwargs)
-        
-    #     if questions:
-    #         for question in questions:
-    #             self.fields['question_%d' % question.id] = forms.ChoiceField(
-    #                 label=question.text,
-    #                 choices=[(answer.id, answer.text) for answer in question.answers.all()],
-    #                 widget=forms.Select(attrs={'class': 'form-control'}),
-    #                 required=True
-    #             )
 
 
 class FirstPageForm(forms.Form):
@@ -112,4 +89,19 @@ class SecondPageForm(forms.Form):
                     choices=[(answer.id, answer.text) for answer in question.answers.all()],
                     widget=forms.Select(attrs={'class': 'form-control'}),
                     required=True
+                )
+
+
+class SurveyForm(forms.Form):
+    def __init__(self, *args, **kwargs):
+        questions = QuestionForSurvey.objects.all()
+        super(SurveyForm, self).__init__(*args, **kwargs)
+        
+        if questions:
+            for question in questions:
+                self.fields['survey-question_%d' % question.id] = forms.ChoiceField(
+                    label=question.text,
+                    choices=[(True, 'Да'), (False, 'Нет')],
+                    widget=forms.CheckboxInput,
+                    required=False
                 )
